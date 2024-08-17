@@ -12,20 +12,23 @@ const Login = () => {
     e.preventDefault();
     try {
       if (username === "username" && password === "password") {
-        // localStorage.setItem("isLoggedIn", "true");
+        // localStorage.setItem(13.201.32.119"isLoggedIn", "true");
         navigate("/");
       } else {
         alert("Invalid credentials");
       }
       localStorage.jwtToken =
         "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2NjY3MTJhYzY0OTJkMzVjYjUyZGQ3NTciLCJpYXQiOjE3MTgwMzEwMjEsImV4cCI6MTcxODAzNDYyMX0.RZSY1ji_kjAi-bJ5C7yHj-QGZVw-JXY8yuCw13c_4pE";
-      const response = await axios.post("http://localhost:3000/auth/login", {
-        username,
-        password,
-        // Headers: {
-        //   Authorization: `Bearer ${localStorage.jwtToken}`,
-        // },
-      });
+      const response = await axios.post(
+        "http://13.201.32.119:3000/auth/login",
+        {
+          username,
+          password,
+          // Headers: {
+          //   Authorization: `Bearer ${localStorage.jwtToken}`,
+          // },
+        }
+      );
       console.log(response);
     } catch (error) {
       console.error("Login failed", error);

@@ -14,10 +14,13 @@ const Signup = () => {
   const handleSignup = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post("http://localhost:3000/auth/signup", {
-        username,
-        password,
-      });
+      const response = await axios.post(
+        "http://13.201.32.119:3000/auth/signup",
+        {
+          username,
+          password,
+        }
+      );
       console.log(response);
       //  token = response.data.token;
       const jwtToken = response.data.token;
