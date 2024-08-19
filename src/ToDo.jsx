@@ -1,47 +1,66 @@
-// src/components/Todo.js
-
 import { useState, useEffect } from "react";
+import axios from "axios";
 import "./ToDo.css";
 
-const Todo = () => {
-  const [todos, setTodos] = useState(
-    JSON.parse(localStorage.getItem("todos")) || []
-  );
+const TodoApp = () => {
+  const [todos, setTodos] = useState([]);
   const [newTodo, setNewTodo] = useState("");
   const [isEditing, setIsEditing] = useState(false);
   const [currentTodo, setCurrentTodo] = useState({});
 
-  useEffect(() => {
-    const storedTodos = JSON.parse(localStorage.getItem("todos"));
-    if (storedTodos) {
-      setTodos(storedTodos);
-    }
-  }, []);
+  const token = localStorage.getItem("jwtToken"); // Assuming the JWT token is stored in localStorage
 
+  const axiosInstance = axios.create({
+    baseURL: `${import.meta.env.VITE_API_URL}/todos`, // Replace with your backend URL
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  // Fetch todos when component mounts
   useEffect(() => {
-    localStorage.setItem("todos", JSON.stringify(todos));
-  }, [todos]);
+    axiosInstance
+      .get("/")
+      .then((response) => {
+        setTodos(response.data);
+      })
+      .catch((error) => {
+        console.error("Error fetching todos:", error);
+      });
+  }, []);
 
   const handleInputChange = (e) => {
     setNewTodo(e.target.value);
   };
 
   const handleEditInputChange = (e) => {
-    setCurrentTodo({ ...currentTodo, text: e.target.value });
+    setCurrentTodo({ ...currentTodo, title: e.target.value });
   };
 
   const addTodo = (e) => {
     e.preventDefault();
     if (newTodo.trim() === "") return;
 
-    const newTodos = [...todos, { id: Date.now(), text: newTodo }];
-    setTodos(newTodos);
-    setNewTodo("");
+    axiosInstance
+      .post("/", { title: newTodo })
+      .then((response) => {
+        setTodos([...todos, response.data]);
+        setNewTodo("");
+      })
+      .catch((error) => {
+        console.error("Error adding todo:", error);
+      });
   };
 
   const deleteTodo = (id) => {
-    const filteredTodos = todos.filter((todo) => todo.id !== id);
-    setTodos(filteredTodos);
+    axiosInstance
+      .delete(`/${id}`)
+      .then(() => {
+        setTodos(todos.filter((todo) => todo._id !== id));
+      })
+      .catch((error) => {
+        console.error("Error deleting todo:", error);
+      });
   };
 
   const editTodo = (todo) => {
@@ -51,14 +70,25 @@ const Todo = () => {
 
   const updateTodo = (e) => {
     e.preventDefault();
-    if (currentTodo.text.trim() === "") return;
+    if (currentTodo.title.trim() === "") return;
 
-    const updatedTodos = todos.map((todo) =>
-      todo.id === currentTodo.id ? currentTodo : todo
-    );
-    setTodos(updatedTodos);
-    setIsEditing(false);
-    setCurrentTodo({});
+    axiosInstance
+      .put(`/${currentTodo._id}`, {
+        title: currentTodo.title,
+        completed: currentTodo.completed,
+      })
+      .then((response) => {
+        setTodos(
+          todos.map((todo) =>
+            todo._id === currentTodo._id ? response.data : todo
+          )
+        );
+        setIsEditing(false);
+        setCurrentTodo({});
+      })
+      .catch((error) => {
+        console.error("Error updating todo:", error);
+      });
   };
 
   return (
@@ -67,17 +97,17 @@ const Todo = () => {
       <form onSubmit={isEditing ? updateTodo : addTodo}>
         <input
           type="text"
-          value={isEditing ? currentTodo.text : newTodo}
+          value={isEditing ? currentTodo.title : newTodo}
           onChange={isEditing ? handleEditInputChange : handleInputChange}
         />
         <button type="submit">{isEditing ? "Update" : "Add"}</button>
       </form>
       <ul>
         {todos.map((todo) => (
-          <li key={todo.id}>
-            {todo.text}
+          <li key={todo._id}>
+            {todo.title}
             <button onClick={() => editTodo(todo)}>Edit</button>
-            <button onClick={() => deleteTodo(todo.id)}>Delete</button>
+            <button onClick={() => deleteTodo(todo._id)}>Delete</button>
           </li>
         ))}
       </ul>
@@ -85,4 +115,4 @@ const Todo = () => {
   );
 };
 
-export default Todo;
+export default TodoApp;

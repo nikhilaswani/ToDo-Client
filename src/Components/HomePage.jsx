@@ -7,13 +7,13 @@ const HomePage = () => {
   const navigate = useNavigate();
 
   const handleLogout = () => {
-    localStorage.removeItem("isLoggedIn");
+    localStorage.removeItem("jwtToken");
     navigate("/login");
   };
   useEffect(() => {
-    const isLoggedIn = localStorage.getItem("isLoggedIn");
+    const isLoggedIn = localStorage.getItem("jwtToken");
     console.log(isLoggedIn);
-    // if (!isLoggedIn) return navigate("/login");
+    if (!isLoggedIn) return navigate("/login");
   }, []);
 
   return (

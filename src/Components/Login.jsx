@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import { Bounce, toast } from "react-toastify";
 import "./Login.css";
 
 const Login = () => {
@@ -10,17 +11,22 @@ const Login = () => {
 
   const handleLogin = async (e) => {
     e.preventDefault();
+
     try {
-      if (username === "username" && password === "password") {
-        // localStorage.setItem(13.201.32.119"isLoggedIn", "true");
-        navigate("/");
-      } else {
-        alert("Invalid credentials");
-      }
-      localStorage.jwtToken =
-        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2NjY3MTJhYzY0OTJkMzVjYjUyZGQ3NTciLCJpYXQiOjE3MTgwMzEwMjEsImV4cCI6MTcxODAzNDYyMX0.RZSY1ji_kjAi-bJ5C7yHj-QGZVw-JXY8yuCw13c_4pE";
+      const toastId = toast("Login started", {
+        type: "default",
+        position: "bottom-right",
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: false,
+        progress: true,
+        theme: "light",
+        isLoading: true,
+        transition: Bounce,
+      });
       const response = await axios.post(
-        "http://13.201.32.119:3000/auth/login",
+        `${import.meta.env.VITE_API_URL}/auth/login`,
         {
           username,
           password,
@@ -29,7 +35,42 @@ const Login = () => {
           // },
         }
       );
-      console.log(response);
+      if (response.data.success) {
+        const jwtToken = response.data.token;
+        // console.log(token);
+        console.log(jwtToken);
+        localStorage.setItem("jwtToken", jwtToken);
+        // alert("Login successful");
+
+        // toast.success("Login successfull", {
+        //   position: "bottom-right",
+        //   autoClose: 5000,
+        //   hideProgressBar: true,
+        //   closeOnClick: true,
+        //   pauseOnHover: true,
+        //   draggable: false,
+        //   // progress: undefined,
+        //   theme: "light",
+        //   transition: Bounce,
+        // });
+
+        toast.update(toastId, {
+          render: "Login completed",
+          type: "success",
+          position: "bottom-right",
+          autoClose: 5000,
+          hideProgressBar: true,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: false,
+          progress: false,
+          theme: "light",
+          isLoading: false,
+          transition: Bounce,
+        });
+        navigate("/");
+        return;
+      }
     } catch (error) {
       console.error("Login failed", error);
     }

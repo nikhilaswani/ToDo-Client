@@ -1,12 +1,10 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-
+import { Bounce, toast } from "react-toastify";
 import "./Signup.css";
 
 const Signup = () => {
-  const [token, setToken] = useState(localStorage.getItem("jwtToken") || "");
-  console.log(token);
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
@@ -14,26 +12,57 @@ const Signup = () => {
   const handleSignup = async (e) => {
     e.preventDefault();
     try {
+      const toastId = toast("Signup started", {
+        type: "default",
+        position: "bottom-right",
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: false,
+        progress: true,
+        theme: "light",
+        isLoading: true,
+        transition: Bounce,
+      });
       const response = await axios.post(
-        "http://13.201.32.119:3000/auth/signup",
+        `${import.meta.env.VITE_API_URL}/auth/signup`,
         {
           username,
           password,
         }
       );
-      console.log(response);
+      if (response.data.success) {
+        const jwtToken = response.data.token;
+        // console.log(token);
+        console.log(jwtToken);
+        localStorage.setItem("jwtToken", jwtToken);
+
+        toast.update(toastId, {
+          render: "Signup completed",
+          type: "success",
+          position: "bottom-right",
+          autoClose: 5000,
+          hideProgressBar: true,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: false,
+          progress: false,
+          theme: "light",
+          isLoading: false,
+          transition: Bounce,
+        });
+
+        // alert("Signup successful");
+        navigate("/");
+        return;
+      }
+
       //  token = response.data.token;
-      const jwtToken = response.data.token;
-      // console.log(token);
-      console.log(jwtToken);
-      localStorage.setItem("jwtToken", jwtToken);
-      setToken(jwtToken);
 
       // localStorage.setItem("user", JSON.stringify({ email, password }));
-      alert("Signup successful");
-      navigate("/");
     } catch (error) {
       console.error("Signup failed", error);
+      alert("unsuccessful");
     }
     // e.preventDefault();
 
