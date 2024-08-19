@@ -10,7 +10,6 @@ const App = () => {
     <Router>
       <div className="App">
         <Routes>
-          <Route path="/signup" element={<Signup />} />
           <Route
             exact
             path="/"
